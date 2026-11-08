@@ -69,23 +69,24 @@ function printSelectedRowInvoice() {
       @page { size: 80mm auto; margin: 0; }
       body {
         font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
-        font-size: 13px;
+        font-size: 12px;
         line-height: 1.35;
         margin: 0 auto;
-        padding: 4mm 1.5mm;
-        width: 70mm;
+        padding: 3mm 3.5mm;
+        width: 67mm;
+        box-sizing: border-box;
         color: #000;
         text-align: right;
       }
       .center { text-align: center; }
       .bold { font-weight: bold; }
-      .store-title { font-size: 18px; font-weight: 900; margin-bottom: 2px; }
+      .store-title { font-size: 17px; font-weight: 900; margin-bottom: 2px; }
       .divider { border-top: 1px dashed #000; margin: 6px 0; }
       .divider-double { border-top: 2px solid #000; margin: 6px 0; }
-      .row { display: flex; justify-content: space-between; margin-bottom: 3px; font-size: 12px; }
-      table { width: 100%; border-collapse: collapse; margin: 6px 0; font-size: 12px; }
-      th { border-top: 1px dashed #000; border-bottom: 1px dashed #000; padding: 4px 1px; font-weight: 800; font-size: 12px; }
-      td { padding: 4px 1px; font-size: 12px; }
+      .row { display: flex; justify-content: space-between; margin-bottom: 3px; font-size: 11.5px; }
+      table { width: 100%; border-collapse: collapse; margin: 6px 0; font-size: 11.5px; table-layout: fixed; box-sizing: border-box; }
+      th { border-top: 1px dashed #000; border-bottom: 1px dashed #000; padding: 3px 2px; font-weight: 800; font-size: 11.5px; }
+      td { padding: 3px 2px; font-size: 11.5px; word-break: break-word; }
       .grand-total {
         font-size: 17px;
         font-weight: 900;
@@ -123,10 +124,10 @@ function printSelectedRowInvoice() {
     <table>
       <thead>
         <tr>
-          <th style="text-align: right; width: 45%;">الصنف</th>
-          <th style="text-align: center; width: 15%;">الكمية</th>
-          <th style="text-align: center; width: 20%;">السعر</th>
-          <th style="text-align: left; width: 20%;">الإجمالي</th>
+          <th style="text-align: right; width: 44%;">الصنف</th>
+          <th style="text-align: center; width: 14%;">الكمية</th>
+          <th style="text-align: center; width: 19%;">السعر</th>
+          <th style="text-align: left; width: 23%; padding-left: 3px;">الإجمالي</th>
         </tr>
       </thead>
       <tbody>

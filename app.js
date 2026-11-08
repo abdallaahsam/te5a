@@ -251,7 +251,7 @@
         state.settings.storeContact = elements.setStoreContact.value.trim();
         state.settings.storeAddress = elements.setStoreAddress.value.trim();
         state.settings.storeTax = elements.setStoreTax.value.trim();
-        state.settings.receiptWidth = '70mm'; // المقاس المعتمد 70mm
+        state.settings.receiptWidth = '67mm'; // مقاس أمان 67mm لمنع قطع الطرف الأيسر
         state.settings.currency = elements.setCurrency.value.trim() || 'ج.م';
         state.settings.footerText = elements.setFooterText.value.trim();
         if (elements.setShowLogo) state.settings.showLogo = elements.setShowLogo.checked;
@@ -686,7 +686,7 @@
         }
 
         const dt = getCurrentDateTime();
-        const printWidth = '70mm'; // المقاس المعتمد 70mm
+        const printWidth = '67mm'; // مقاس أمان 67mm لمنع قطع الطرف الأيسر
 
         const frameDoc = printFrame.contentWindow.document;
         frameDoc.open();
@@ -701,7 +701,8 @@
             font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
             width: ${printWidth};
             margin: 0 auto;
-            padding: 3mm 2mm;
+            padding: 3mm 3.5mm;
+            box-sizing: border-box;
             color: #000;
             text-align: center;
             font-size: 12px;
@@ -713,7 +714,7 @@
 </head>
 <body>
     <div class="bold" style="font-size: 16px;">=== محل قطع غيار الزين - فحص الطابعة ===</div>
-    <div style="margin: 4px 0; font-size: 12px;">المقاس المعتمد: 70mm</div>
+    <div style="margin: 4px 0; font-size: 12px;">المقاس الآمن: 67mm (يمنع قطع الأطراف)</div>
     <div class="line"></div>
     <div style="font-size: 12px;">التاريخ: ${dt.dateStr} - الوقت: ${dt.timeStr}</div>
     <div style="font-size: 14px; margin: 6px 0; letter-spacing: 2px;">████████████████</div>
