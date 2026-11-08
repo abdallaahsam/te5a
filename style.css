@@ -1,0 +1,814 @@
+/* ==========================================================================
+   طابعة فواتير المحل - 80mm Thermal Receipt Generator
+   Modern UI Styles + Precision 80mm Thermal Print Styles
+   ========================================================================== */
+
+:root {
+    --primary: #10b981;
+    --primary-hover: #059669;
+    --primary-light: #ecfdf5;
+    --accent: #2563eb;
+    --accent-hover: #1d4ed8;
+    --dark: #0f172a;
+    --dark-surface: #1e293b;
+    --dark-border: #334155;
+    --text-main: #0f172a;
+    --text-muted: #64748b;
+    --border: #e2e8f0;
+    --bg-page: #f8fafc;
+    --bg-card: #ffffff;
+    --danger: #ef4444;
+    --warning: #f59e0b;
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    --radius: 12px;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, -apple-system, BlinkMacSystemFont, Arial, sans-serif;
+    background-color: var(--bg-page);
+    color: var(--text-main);
+    direction: rtl;
+    text-align: right;
+    line-height: 1.5;
+    min-height: 100vh;
+}
+
+/* App Header */
+.app-header {
+    background: #0f172a;
+    color: #ffffff;
+    padding: 0.85rem 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid #10b981;
+    box-shadow: var(--shadow-md);
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+/* Mode Switcher Toggle */
+.mode-switcher {
+    display: inline-flex;
+    background: #1e293b;
+    padding: 3px;
+    border-radius: 10px;
+    border: 1px solid #334155;
+}
+
+.mode-btn {
+    background: transparent;
+    border: none;
+    color: #94a3b8;
+    padding: 0.5rem 1.1rem;
+    font-size: 0.9rem;
+    font-weight: 700;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-family: inherit;
+    user-select: none;
+}
+
+.mode-btn:hover {
+    color: #ffffff;
+}
+
+.mode-btn.active {
+    background: #10b981;
+    color: #ffffff;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.25);
+}
+
+/* Visibility rules based on active mode */
+body.mode-simple .mode-pro-only {
+    display: none !important;
+}
+
+body.mode-pro .mode-simple-only {
+    display: none !important;
+}
+
+body.mode-simple #receipt-to-print {
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+body.mode-simple #receipt-to-print:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.brand-icon {
+    font-size: 1.8rem;
+    background: rgba(16, 185, 129, 0.15);
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.brand h1 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #f8fafc;
+}
+
+.brand p {
+    font-size: 0.8rem;
+    color: #94a3b8;
+}
+
+.header-actions {
+    display: flex;
+    gap: 0.6rem;
+}
+
+/* Layout */
+.main-container {
+    max-width: 1500px;
+    margin: 1.5rem auto;
+    padding: 0 1rem;
+    display: grid;
+    grid-template-columns: 1fr 400px;
+    gap: 1.5rem;
+    align-items: start;
+}
+
+@media (max-width: 1024px) {
+    .main-container {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Panels & Cards */
+.panel {
+    background: var(--bg-card);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-sm);
+    padding: 1.25rem;
+    margin-bottom: 1.25rem;
+}
+
+.panel-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 1.05rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    color: #1e293b;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 0.6rem;
+}
+
+.panel-title span {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Paste Area */
+.paste-box-container {
+    position: relative;
+}
+
+.paste-textarea {
+    width: 100%;
+    min-height: 100px;
+    padding: 0.9rem;
+    border: 2px dashed #94a3b8;
+    background: #f8fafc;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 0.95rem;
+    direction: rtl;
+    resize: vertical;
+    transition: all 0.2s;
+    outline: none;
+    color: #1e293b;
+}
+
+.paste-textarea:focus {
+    border-color: var(--primary);
+    background: #ffffff;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+}
+
+.paste-hint {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-top: 0.4rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.paste-hint code {
+    background: #e2e8f0;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 0.8rem;
+    direction: ltr;
+}
+
+/* Buttons */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    padding: 0.6rem 1.1rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    border-radius: 8px;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: all 0.2s;
+    text-decoration: none;
+    user-select: none;
+}
+
+.btn-primary {
+    background-color: var(--primary);
+    color: white;
+}
+.btn-primary:hover {
+    background-color: var(--primary-hover);
+}
+
+.btn-accent {
+    background-color: var(--accent);
+    color: white;
+}
+.btn-accent:hover {
+    background-color: var(--accent-hover);
+}
+
+.btn-outline {
+    background-color: transparent;
+    border-color: #cbd5e1;
+    color: #334155;
+}
+.btn-outline:hover {
+    background-color: #f1f5f9;
+    border-color: #94a3b8;
+}
+
+.btn-danger {
+    background-color: #fee2e2;
+    color: var(--danger);
+    border-color: #fecaca;
+}
+.btn-danger:hover {
+    background-color: #fecaca;
+}
+
+.btn-lg {
+    padding: 0.85rem 1.6rem;
+    font-size: 1.05rem;
+    font-weight: 700;
+}
+
+.btn-block {
+    width: 100%;
+}
+
+.btn-group {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+/* Invoice Header Inputs */
+.grid-fields {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 0.85rem;
+    margin-bottom: 1rem;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+.form-group label {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #475569;
+}
+
+.form-control {
+    padding: 0.55rem 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-family: inherit;
+    background: #ffffff;
+    color: #0f172a;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.form-control:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
+}
+
+/* Items Table */
+.items-table-wrapper {
+    overflow-x: auto;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 1rem;
+}
+
+.items-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.88rem;
+}
+
+.items-table th {
+    background: #f1f5f9;
+    padding: 0.6rem 0.75rem;
+    color: #475569;
+    font-weight: 600;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+}
+
+.items-table td {
+    padding: 0.5rem 0.6rem;
+    border-bottom: 1px solid #f1f5f9;
+    vertical-align: middle;
+}
+
+.items-table tr:last-child td {
+    border-bottom: none;
+}
+
+.items-table input {
+    width: 100%;
+    padding: 0.35rem 0.5rem;
+    border: 1px solid #cbd5e1;
+    border-radius: 4px;
+    font-family: inherit;
+    font-size: 0.85rem;
+}
+
+.items-table .td-num {
+    text-align: center;
+    width: 40px;
+    color: #64748b;
+    font-weight: bold;
+}
+
+.items-table .td-actions {
+    text-align: center;
+    width: 45px;
+}
+
+.delete-btn {
+    background: none;
+    border: none;
+    color: #ef4444;
+    cursor: pointer;
+    font-size: 1.1rem;
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+.delete-btn:hover {
+    background: #fee2e2;
+}
+
+/* Alert Notification */
+.alert-box {
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    font-size: 0.88rem;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+.alert-success {
+    background-color: #d1fae5;
+    color: #065f46;
+    border: 1px solid #a7f3d0;
+}
+.alert-warning {
+    background-color: #fef3c7;
+    color: #92400e;
+    border: 1px solid #fde68a;
+}
+
+/* ==========================================================================
+   Receipt Paper Live Preview (On Screen)
+   ========================================================================== */
+.receipt-preview-sticky {
+    position: sticky;
+    top: 1rem;
+}
+
+.receipt-preview-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+}
+
+.badge-80mm {
+    background: #0f172a;
+    color: #38bdf8;
+    font-size: 0.75rem;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+.receipt-wrapper {
+    background: #e2e8f0;
+    padding: 1.25rem 0.75rem;
+    border-radius: 12px;
+    display: flex;
+    justify-content: center;
+    box-shadow: inset 0 2px 4px 0 rgb(0 0 0 / 0.05);
+}
+
+/* The actual receipt element (80mm paper roll - 70mm printable width) */
+.thermal-receipt {
+    width: 70mm;
+    max-width: 100%;
+    background: #ffffff;
+    color: #000000;
+    padding: 14px 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
+    font-size: 12px;
+    line-height: 1.35;
+    border-top: 3px solid #1e293b;
+    position: relative;
+    user-select: text;
+}
+
+/* Store Logo */
+.rc-logo-box {
+    text-align: center;
+    margin-bottom: 6px;
+}
+
+.rc-logo {
+    max-width: 62mm;
+    max-height: 28mm;
+    object-fit: contain;
+    display: inline-block;
+    filter: contrast(130%);
+}
+
+/* Sawtooth paper effect at bottom */
+.thermal-receipt::after {
+    content: "";
+    position: absolute;
+    bottom: -8px;
+    left: 0;
+    right: 0;
+    height: 8px;
+    background: radial-gradient(circle, transparent, transparent 50%, #ffffff 50%, #ffffff 100%);
+    background-size: 10px 10px;
+    transform: rotate(180deg);
+}
+
+.rc-center {
+    text-align: center;
+}
+.rc-left {
+    text-align: left;
+}
+.rc-right {
+    text-align: right;
+}
+.rc-bold {
+    font-weight: bold;
+}
+
+.rc-store-name {
+    font-size: 18px;
+    font-weight: 900;
+    margin-bottom: 3px;
+    letter-spacing: -0.2px;
+}
+
+.rc-store-sub {
+    font-size: 12.5px;
+    color: #222;
+    margin-bottom: 4px;
+    font-weight: 600;
+}
+
+.rc-store-contact {
+    font-size: 11.5px;
+    margin-bottom: 5px;
+}
+
+.rc-divider {
+    border: none;
+    border-top: 1px dashed #000;
+    margin: 6px 0;
+}
+
+.rc-divider-double {
+    border: none;
+    border-top: 2px solid #000;
+    margin: 6px 0;
+}
+
+.rc-meta-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    margin-bottom: 3px;
+}
+
+.rc-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 6px 0;
+    font-size: 12px;
+}
+
+.rc-table th {
+    border-top: 1px dashed #000;
+    border-bottom: 1px dashed #000;
+    padding: 4px 1px;
+    font-weight: 800;
+    font-size: 12px;
+}
+
+.rc-table td {
+    padding: 4px 1px;
+    vertical-align: top;
+    font-size: 12px;
+}
+
+.rc-table tr.item-row td {
+    border-bottom: 1px dotted #ccc;
+}
+
+.rc-item-name {
+    font-weight: 800;
+    font-size: 13px;
+    display: block;
+    word-break: break-word;
+}
+
+.rc-item-code {
+    font-size: 10.5px;
+    color: #444;
+}
+
+.rc-totals-table {
+    width: 100%;
+    margin-top: 6px;
+    font-size: 12.5px;
+}
+
+.rc-totals-table td {
+    padding: 3px 0;
+}
+
+.rc-grand-total {
+    font-size: 17px;
+    font-weight: 900;
+    border-top: 1.5px solid #000;
+    border-bottom: 1.5px solid #000;
+    padding: 5px 0;
+}
+
+.rc-footer-text {
+    font-size: 11px;
+    margin-top: 8px;
+    text-align: center;
+    line-height: 1.35;
+    font-weight: 600;
+}
+
+/* Modal for Settings */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+    padding: 1rem;
+}
+
+.modal-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.modal-card {
+    background: #ffffff;
+    border-radius: 16px;
+    max-width: 600px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: var(--shadow-lg);
+    padding: 1.5rem;
+    position: relative;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 0.8rem;
+    margin-bottom: 1.2rem;
+}
+
+.modal-header h3 {
+    font-size: 1.2rem;
+    color: #0f172a;
+}
+
+.modal-close-btn {
+    background: none;
+    border: none;
+    font-size: 1.4rem;
+    cursor: pointer;
+    color: #64748b;
+    border-radius: 6px;
+    width: 32px;
+    height: 32px;
+}
+.modal-close-btn:hover {
+    background: #f1f5f9;
+    color: #0f172a;
+}
+
+/* History Modal */
+.history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    max-height: 50vh;
+    overflow-y: auto;
+}
+
+.history-item {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.8rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #f8fafc;
+}
+
+.history-item:hover {
+    border-color: var(--primary);
+    background: #ffffff;
+}
+
+/* ==========================================================================
+   PRINT MEDIA QUERY - 80mm THERMAL RECEIPT PRECISION
+   ========================================================================== */
+/* ==========================================================================
+   PRINT MEDIA QUERY - 80mm THERMAL RECEIPT PRECISION
+   ========================================================================== */
+@page {
+    size: 80mm auto;
+    margin: 0mm;
+}
+
+@media print {
+    html, body {
+        width: 80mm !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        background: #ffffff !important;
+        color: #000000 !important;
+        font-family: 'Segoe UI', Tahoma, Arial, sans-serif !important;
+    }
+
+    /* Hide non-print UI cleanly */
+    .no-print,
+    .app-header,
+    .panel,
+    .header-actions,
+    .receipt-preview-header,
+    .modal-overlay,
+    .alert-box {
+        display: none !important;
+    }
+
+    .main-container {
+        display: block !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        max-width: none !important;
+    }
+
+    .receipt-preview-sticky {
+        position: static !important;
+        display: block !important;
+    }
+
+    .receipt-wrapper {
+        background: transparent !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        box-shadow: none !important;
+        display: block !important;
+    }
+
+    #receipt-to-print {
+        display: block !important;
+        width: 70mm !important; /* المقاس المعتمد 70mm */
+        max-width: 70mm !important;
+        margin: 0 auto !important;
+        padding: 2mm 1.5mm 6mm 1.5mm !important;
+        box-shadow: none !important;
+        border: none !important;
+        background: #ffffff !important;
+        color: #000000 !important;
+    }
+
+    .rc-logo {
+        max-width: 58mm !important;
+        max-height: 26mm !important;
+        object-fit: contain !important;
+        display: block !important;
+        margin: 0 auto 5px auto !important;
+        image-rendering: -webkit-optimize-contrast;
+    }
+
+    #receipt-to-print * {
+        color: #000000 !important;
+    }
+
+    .thermal-receipt::after {
+        display: none !important;
+    }
+
+    .rc-table th, 
+    .rc-table td {
+        font-size: 12px !important;
+        color: #000000 !important;
+    }
+
+    .rc-divider {
+        border-top: 1px dashed #000000 !important;
+    }
+
+    .rc-divider-double {
+        border-top: 2px solid #000000 !important;
+    }
+
+    .rc-grand-total {
+        font-size: 17px !important;
+        font-weight: 900 !important;
+        border-top: 1.5px solid #000000 !important;
+        border-bottom: 1.5px solid #000000 !important;
+    }
+
+    canvas, img {
+        image-rendering: pixelated;
+    }
+}

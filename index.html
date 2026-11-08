@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>طباعة فواتير المحل 80mm - متوافق مع جوجل شيت</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Header Navigation -->
+    <header class="app-header no-print">
+        <div class="brand">
+            <div class="brand-icon">🧾</div>
+            <div>
+                <h1>برنامج طباعة الفواتير الحرارية (80mm)</h1>
+                <p>مخصص لطباعة سطور المبيعات من جوجل شيت بضغطة زر واحدة</p>
+            </div>
+        </div>
+        
+        <!-- Mode Switcher -->
+        <div class="mode-switcher no-print">
+            <button class="mode-btn active" id="btn-mode-simple" type="button" title="الوضع البسيط: لصق وطباعة سريعة">
+                ⚡ الوضع البسيط
+            </button>
+            <button class="mode-btn" id="btn-mode-pro" type="button" title="الوضع الاحترافي: تعديل تفصيلي وجدول الأصناف">
+                🛠️ الوضع الاحترافي
+            </button>
+        </div>
+
+        <div class="header-actions">
+            <button class="btn btn-outline mode-pro-only" id="btn-test-print" title="طباعة ورقة تجريبية لفحص الطابعة الحرارية">
+                🧪 فحص الطابعة
+            </button>
+            <button class="btn btn-outline" id="btn-open-history" title="سجل الفواتير السابقة">
+                📜 سجل الفواتير
+            </button>
+            <button class="btn btn-outline mode-pro-only" id="btn-open-sheets-guide" title="طريقة الربط المباشر مع جوجل شيت">
+                🔗 كود جوجل شيت
+            </button>
+            <button class="btn btn-outline mode-pro-only" id="btn-open-settings" title="إعدادات المحل والترويسة">
+                ⚙️ إعدادات المحل
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="main-container">
+        
+        <!-- Left Panel: Operations & Controls -->
+        <div class="operations-column no-print">
+            
+            <!-- Paste Box Panel -->
+            <div class="panel">
+                <div class="panel-title">
+                    <span>📋 لصق سطر المبيعات من جوجل شيت</span>
+                    <div class="mode-pro-only" style="display: flex; gap: 0.4rem;">
+                        <button class="btn btn-primary" id="btn-read-clipboard" style="font-size: 0.8rem; padding: 0.3rem 0.7rem;" title="قراءة محتوى الحافظة المنسوخ تلقائياً">
+                            📋 لصق من الحافظة
+                        </button>
+                        <button class="btn btn-outline" id="btn-paste-sample" style="font-size: 0.8rem; padding: 0.3rem 0.7rem;">
+                            تجربة سطر عينة
+                        </button>
+                    </div>
+                </div>
+                <div class="paste-box-container">
+                    <textarea 
+                        id="paste-input" 
+                        class="paste-textarea" 
+                        placeholder="الصق سطر (أو أكثر) من جوجل شيت هنا مباشرة... (Ctrl + V)"
+                        autofocus
+                    ></textarea>
+                </div>  
+                <div class="paste-hint">
+                    <span>💡 <b>تلميح:</b> بمجرد اللصق يتم استخراج الصنف، السعر المعتمد، والكمية تلقائياً.</span>
+                    <code>يدعم سطراً واحداً أو عدة أسطر</code>
+                </div>
+                
+                <!-- Action Buttons Under Textarea -->
+                <div style="margin-top: 0.9rem; display: flex; flex-direction: column; gap: 0.6rem;">
+                    <button class="btn btn-primary btn-lg" id="btn-read-clipboard-main" style="width: 100%; font-size: 1.05rem; background: #2563eb;">
+                        📋 لصق مباشر من الحافظة وتوليد الفاتورة
+                    </button>
+                    <div class="mode-pro-only" style="display: flex; gap: 0.6rem;">
+                        <button class="btn btn-accent" id="btn-process-paste" style="flex: 2;">
+                            ✨ توليد الفاتورة من النص المكتوب
+                        </button>
+                        <button class="btn btn-outline" id="btn-clear-paste" style="flex: 1;">
+                            مسح الحقل
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Invoice Metadata Panel (Pro Mode Only) -->
+            <div class="panel mode-pro-only">
+                <div class="panel-title">
+                    <span>📝 بيانات الفاتورة والعميل</span>
+                    <span id="items-count-badge" style="font-size: 0.8rem; font-weight: normal; color: var(--text-muted);">
+                        0 أصناف
+                    </span>
+                </div>
+                <div class="grid-fields">
+                    <div class="form-group">
+                        <label for="inv-number">رقم الفاتورة</label>
+                        <input type="text" id="inv-number" class="form-control" value="INV-1001">
+                    </div>
+                    <div class="form-group">
+                        <label for="inv-date">التاريخ</label>
+                        <input type="text" id="inv-date" class="form-control" value="">
+                    </div>
+                    <div class="form-group">
+                        <label for="inv-time">الوقت</label>
+                        <input type="text" id="inv-time" class="form-control" value="">
+                    </div>
+                    <div class="form-group">
+                        <label for="inv-customer">اسم العميل</label>
+                        <input type="text" id="inv-customer" class="form-control" value="عميل نقدي">
+                    </div>
+                    <div class="form-group">
+                        <label for="inv-payment">طريقة الدفع</label>
+                        <input type="text" id="inv-payment" class="form-control" list="payment-methods" value="كاش">
+                        <datalist id="payment-methods">
+                            <option value="كاش">
+                            <option value="فودافون كاش / محفظة">
+                            <option value="فيزا / بطاقة">
+                            <option value="إنستاباي">
+                            <option value="تحويل بنكي / انستاباي">
+                            <option value="آجل / حساب">
+                        </datalist>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Items Table Panel (Pro Mode Only) -->
+            <div class="panel mode-pro-only">
+                <div class="panel-title">
+                    <span>🛒 أصناف الفاتورة</span>
+                    <button class="btn btn-outline" id="btn-add-item" style="font-size: 0.8rem; padding: 0.3rem 0.7rem;">
+                        + إضافة صنف يدوياً
+                    </button>
+                </div>
+                <div class="items-table-wrapper">
+                    <table class="items-table" id="items-table">
+                        <thead>
+                            <tr>
+                                <th class="td-num">#</th>
+                                <th>اسم الصنف</th>
+                                <th style="width: 100px;">كود الصنف</th>
+                                <th style="width: 80px;">الكمية</th>
+                                <th style="width: 90px;">السعر</th>
+                                <th style="width: 100px;">الإجمالي</th>
+                                <th class="td-actions">حذف</th>
+                            </tr>
+                        </thead>
+                        <tbody id="items-tbody">
+                            <!-- Items inserted dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Payment & Discount Calculations -->
+                <div class="grid-fields" style="margin-top: 1rem; border-top: 1px dashed var(--border); padding-top: 1rem;">
+                    <div class="form-group">
+                        <label for="inv-discount">خصم إضافي (ج.م)</label>
+                        <input type="number" step="0.5" id="inv-discount" class="form-control" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="inv-paid">المبلغ المدفوع (ج.م)</label>
+                        <input type="number" step="0.5" id="inv-paid" class="form-control" placeholder="0.00">
+                    </div>
+                    <div class="form-group">
+                        <label for="inv-change">المتبقي / الباقي (ج.م)</label>
+                        <input type="text" id="inv-change" class="form-control" value="0.00" readonly style="background: #f1f5f9; font-weight: bold; color: #1e293b;">
+                    </div>
+                </div>
+
+                <!-- Print & Actions Bar -->
+                <div style="display: flex; gap: 0.8rem; margin-top: 1.25rem;">
+                    <button class="btn btn-primary btn-lg btn-block" id="btn-print-main">
+                        🖨️ طباعة الفاتورة الآن (Ctrl + P)
+                    </button>
+                    <button class="btn btn-outline btn-lg" id="btn-new-invoice" title="بدء فاتورة جديدة ومسح الحالية">
+                        🔄 جديدة
+                    </button>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Right Panel: Live 80mm Receipt Preview -->
+        <div class="receipt-preview-sticky">
+            <div class="receipt-preview-header no-print">
+                <span style="font-weight: 700; color: #1e293b; font-size: 0.95rem;">
+                    👁️ معاينة الفاتورة الحرارية
+                </span>
+                <span class="badge-80mm">طابعة 80mm (مقاس 70mm)</span>
+            </div>
+
+            <div class="receipt-wrapper">
+                <!-- PRINTABLE RECEIPT (This is what prints) -->
+                <div class="thermal-receipt" id="receipt-to-print" title="اضغط للطباعة فوراً (أو Ctrl + P)">
+                    
+                    <!-- Store Header -->
+                    <div class="rc-center">
+                        <div class="rc-logo-box" id="rc-logo-box">
+                            <img src="logo.png" id="rc-logo-img" alt="EL ZAIN Logo" class="rc-logo">
+                        </div>
+                        <div class="rc-store-name" id="rc-store-name">EL ZAIN - الزين لقطع الغيار</div>
+                        <div class="rc-store-sub" id="rc-store-sub">لتجارة وتوزيع قطع الغيار والاكسسوارات</div>
+                        <div class="rc-store-contact" id="rc-store-contact">هاتف: 01000000000 | 01100000000</div>
+                        <div class="rc-store-contact" id="rc-store-address">العنوان: شارع التجاري، بجوار المسجد الكبير</div>
+                        <div class="rc-store-contact" id="rc-store-tax" style="display: none;">الرقم الضريبي / السجل: 123456789</div>
+                    </div>
+
+                    <div class="rc-divider-double"></div>
+
+                    <!-- Receipt Metadata -->
+                    <div class="rc-center rc-bold" style="font-size: 13px; margin-bottom: 4px;">
+                        فاتورة مبيعات
+                    </div>
+                    
+                    <div class="rc-meta-row">
+                        <span>رقم الفاتورة:</span>
+                        <span class="rc-bold" id="rc-inv-number">INV-1001</span>
+                    </div>
+                    <div class="rc-meta-row">
+                        <span>التاريخ: <span id="rc-inv-date">01/11/2026</span></span>
+                        <span>الوقت: <span id="rc-inv-time">12:30 م</span></span>
+                    </div>
+                    <div class="rc-meta-row">
+                        <span>العميل:</span>
+                        <span class="rc-bold" id="rc-inv-customer">عميل نقدي</span>
+                    </div>
+                    <div class="rc-meta-row">
+                        <span>طريقة الدفع:</span>
+                        <span id="rc-inv-payment">كاش</span>
+                    </div>
+                    <div class="rc-divider"></div>
+
+                    <!-- Items Table -->
+                    <table class="rc-table">
+                        <thead>
+                            <tr>
+                                <th class="rc-right" style="width: 48%;">الصنف</th>
+                                <th class="rc-center" style="width: 14%;">الكمية</th>
+                                <th class="rc-center" style="width: 18%;">السعر</th>
+                                <th class="rc-left" style="width: 20%;">الإجمالي</th>
+                            </tr>
+                        </thead>
+                        <tbody id="rc-items-body">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+
+                    <div class="rc-divider"></div>
+
+                    <!-- Totals Section -->
+                    <table class="rc-totals-table">
+                        <tr id="rc-subtotal-row">
+                            <td class="rc-right">المجموع الفرعي:</td>
+                            <td class="rc-left rc-bold" id="rc-subtotal">0.00 ج.م</td>
+                        </tr>
+                        <tr id="rc-discount-row" style="display: none;">
+                            <td class="rc-right">الخصم:</td>
+                            <td class="rc-left rc-bold" id="rc-discount">0.00 ج.م</td>
+                        </tr>
+                        <tr class="rc-grand-total">
+                            <td class="rc-right">الصافي المطلوب:</td>
+                            <td class="rc-left" id="rc-grand-total">0.00 ج.م</td>
+                        </tr>
+                        <tr id="rc-paid-row" style="display: none;">
+                            <td class="rc-right">المدفوع:</td>
+                            <td class="rc-left" id="rc-paid">0.00 ج.م</td>
+                        </tr>
+                        <tr id="rc-change-row" style="display: none;">
+                            <td class="rc-right">الباقي للعميل:</td>
+                            <td class="rc-left rc-bold" id="rc-change">0.00 ج.م</td>
+                        </tr>
+                    </table>
+
+                    <div class="rc-divider"></div>
+
+                    <!-- Footer -->
+                    <div class="rc-footer-text" id="rc-footer-text">
+                        البضاعة المباعة ترد وتستبدل خلال 14 يوماً بالفاتورة وبحالتها الأصلية<br>
+                        شكراً لزيارتكم ونسعد بخدمتكم دائماً!
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Print Shortcut Button on Right side -->
+            <button class="btn btn-primary btn-block no-print mode-pro-only" id="btn-print-secondary" style="margin-top: 0.75rem;">
+                🖨️ طباعة المعاينة الحالية
+            </button>
+        </div>
+
+    </main>
+
+    <!-- Modal: Settings -->
+    <div class="modal-overlay" id="modal-settings">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>⚙️ إعدادات المتجر والطابعة</h3>
+                <button class="modal-close-btn" id="btn-close-settings">&times;</button>
+            </div>
+            
+            <div class="form-group" style="margin-bottom: 0.8rem;">
+                <label>اسم المحل / المتجر</label>
+                <input type="text" id="set-store-name" class="form-control" value="محل قطع غيار سيارات">
+            </div>
+            <div class="form-group" style="margin-bottom: 0.8rem;">
+                <label>النشاط / الوصف الفرعي</label>
+                <input type="text" id="set-store-sub" class="form-control" value="لتجارة وتوزيع قطع الغيار والاكسسوارات">
+            </div>
+            <div class="form-group" style="margin-bottom: 0.8rem;">
+                <label>أرقام الهواتف والتواصل</label>
+                <input type="text" id="set-store-contact" class="form-control" value="هاتف: 01000000000 - 01100000000">
+            </div>
+            <div class="form-group" style="margin-bottom: 0.8rem;">
+                <label>العنوان</label>
+                <input type="text" id="set-store-address" class="form-control" value="شارع الجمهورية، بجوار البنك الأهلي">
+            </div>
+            <div class="form-group" style="margin-bottom: 0.8rem;">
+                <label>الرقم الضريبي أو السجل التجاري (اختياري)</label>
+                <input type="text" id="set-store-tax" class="form-control" placeholder="مثال: س.ت: 12345 / ضريبي: 987654">
+            </div>
+            <div class="form-group" style="margin-bottom: 0.8rem;">
+                <label>اللوجو وشعار المحل</label>
+                <div style="display: flex; align-items: center; gap: 0.8rem;">
+                    <img src="logo.png" id="set-logo-preview" style="max-height: 35px; border: 1px solid var(--border); border-radius: 4px; padding: 2px;">
+                    <input type="file" id="set-logo-input" accept="image/*" class="form-control" style="font-size: 0.8rem; padding: 0.3rem 0.5rem;">
+                </div>
+            </div>
+            <div style="background: #f1f5f9; padding: 0.6rem 0.8rem; border-radius: 8px; font-size: 0.85rem; margin-bottom: 0.8rem; color: #1e293b; border: 1px solid #cbd5e1;">
+                📐 <strong>مقاس الفاتورة:</strong> تم تثبيته على <strong>70mm</strong> (المقاس المثالي المعتمد لطابعات 80mm).
+            </div>
+            <div class="form-group" style="margin-bottom: 0.8rem;">
+                <label>رمز العملة</label>
+                <input type="text" id="set-currency" class="form-control" value="ج.م">
+            </div>
+            <div class="form-group" style="margin-bottom: 0.8rem;">
+                <label>نص أسفل الفاتورة (سياسة الاستبدال والشكر)</label>
+                <textarea id="set-footer-text" class="form-control" rows="2">البضاعة المباعة ترد وتستبدل خلال 14 يوماً بالفاتورة وبحالتها الأصلية&#10;شكراً لزيارتكم ونسعد بخدمتكم دائماً!</textarea>
+            </div>
+            
+            <div style="margin-top: 1rem; border-top: 1px solid var(--border); padding-top: 0.8rem;">
+                <label style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; cursor: pointer;">
+                    <input type="checkbox" id="set-show-logo" checked>
+                    <span>إظهار شعار المحل (اللوجو) أعلى الفاتورة</span>
+                </label>
+                <label style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; cursor: pointer;">
+                    <input type="checkbox" id="set-show-code" checked>
+                    <span>إظهار كود الصنف تحت اسم الصنف بالفاتورة</span>
+                </label>
+                <label style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; cursor: pointer;">
+                    <input type="checkbox" id="set-auto-print">
+                    <span>الطباعة التلقائية بمجرد الضغط على استيراد السطر</span>
+                </label>
+            </div>
+
+            <div style="margin-top: 1.5rem; display: flex; justify-content: flex-end; gap: 0.6rem;">
+                <button class="btn btn-primary" id="btn-save-settings">حفظ التغييرات</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: History -->
+    <div class="modal-overlay" id="modal-history">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>📜 سجل الفواتير المطبوعة</h3>
+                <button class="modal-close-btn" id="btn-close-history">&times;</button>
+            </div>
+            <div class="history-list" id="history-container">
+                <!-- Dynamically filled -->
+            </div>
+            <div style="margin-top: 1.25rem; display: flex; justify-content: space-between;">
+                <button class="btn btn-danger" id="btn-clear-history">مسح السجل</button>
+                <button class="btn btn-outline" id="btn-dismiss-history">إغلاق</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Google Sheets Guide -->
+    <div class="modal-overlay" id="modal-sheets-guide">
+        <div class="modal-card" style="max-width: 680px;">
+            <div class="modal-header">
+                <h3>🔗 طريقة الطباعة المباشرة من جوجل شيت</h3>
+                <button class="modal-close-btn" id="btn-close-sheets-guide">&times;</button>
+            </div>
+            <div style="font-size: 0.9rem; line-height: 1.7; color: #334155;">
+                <p>يمكنك استخدام هذا البرنامج بطريقتين:</p>
+                <ol style="margin-right: 1.5rem; margin-top: 0.5rem; margin-bottom: 1rem;">
+                    <li><strong>الطريقة العادية السريعة:</strong> حدد سطر البيع في شيت جوجل واضغط <kbd>Ctrl + C</kbd> ثم الصقه هنا <kbd>Ctrl + V</kbd> وسيتم توليد الفاتورة فوراً.</li>
+                    <li><strong>طريقة الزر داخل جوجل شيت (اختياري ومتقدم):</strong> يمكنك إضافة زر في شيت جوجل يفتح هذه الصفحة ومعه بيانات السطر المحدد تلقائياً!</li>
+                </ol>
+
+                <h4 style="color: #0f172a; margin-bottom: 0.5rem;">⚙️ نصائح هامة لإعدادات الطابعة 80mm عند الطباعة:</h4>
+                <div style="background: #f1f5f9; padding: 0.8rem; border-radius: 8px; font-size: 0.85rem; margin-bottom: 1rem;">
+                    • <strong>الوجهة (Destination):</strong> اختر طابعتك الحرارية (مثال: Xprinter, POS-80, Epson).<br>
+                    • <strong>حجم الورق (Paper size):</strong> اختر <b>80mm</b> أو <b>Roll Paper 80 x 297 mm</b>.<br>
+                    • <strong>الهوامش (Margins):</strong> اجعلها <b>بدون (None)</b>.<br>
+                    • <strong>خيارات إضافية:</strong> ألغِ تحديد خيار (الرؤوس والتذييلات / Headers and footers) حتى لا تظهر روابط المتصفح أو التاريخ في الورقة.
+                </div>
+            </div>
+            <div style="display: flex; justify-content: flex-end;">
+                <button class="btn btn-outline" id="btn-dismiss-guide">فهمت ذلك</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Offline Scripts -->
+    <script src="app.js"></script>
+</body>
+</html>
