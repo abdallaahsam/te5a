@@ -67,6 +67,7 @@
         btnPrintMain: document.getElementById('btn-print-main'),
         btnPrintSecondary: document.getElementById('btn-print-secondary'),
         btnNewInvoice: document.getElementById('btn-new-invoice'),
+        btnNewInvoiceSecondary: document.getElementById('btn-new-invoice-secondary'),
 
         // Receipt Live Elements
         rcToPrint: document.getElementById('receipt-to-print'),
@@ -897,6 +898,7 @@
      * Start a new empty invoice
      */
     function startNewInvoice() {
+        incrementInvoiceNumber();
         const dt = getCurrentDateTime();
         state.date = dt.dateStr;
         state.time = dt.timeStr;
@@ -923,9 +925,9 @@
      * Sample Row for quick demonstration
      */
     function loadSampleData() {
-        const sampleRow = "1\t01/11/2026\tبوجيه NGK\tM003\t5٫\t200\t200\t200\t1٬000\t250\tاحمد سامح\t01112302757\tإنستاباي";
+        const sampleRow = "1\t01/11/2026\tبوجيه NGK ياباني أصلي\tM003\t5٫\t200\t200\t170\t850\t250\tاحمد سامح\t01112302757\tإنستاباي";
         elements.pasteInput.value = sampleRow;
-        handlePasteProcess();
+        handlePasteProcess(false);
     }
 
     /**
@@ -984,18 +986,39 @@
         // Shared Clipboard Paste Function
         async function pasteFromClipboard() {
             try {
+                if (!navigator.clipboard || !navigator.clipboard.readText) {
+                    throw new Error('Clipboard API not available');
+                }
                 const text = await navigator.clipboard.readText();
                 if (!text || !text.trim()) {
-                    alert('الحافظة فارغة! يرجى نسخ سطر البيع من شيت جوجل أولاً (Ctrl + C).');
+                    alert('الحافظة فارغة حالياً!\n\nيرجى نسخ سطر البيع من شيت جوجل أولاً (Ctrl + C) ثم الضغط على هذا الزر أو استخدام (Ctrl + V).');
                     return;
                 }
                 elements.pasteInput.value = text;
                 handlePasteProcess(true);
             } catch(err) {
-                alert('يرجى لصق السطر يدوياً بالضغط داخل المربع ثم Ctrl + V (أو السماح للمتصفح بالوصول للحافظة).');
-                elements.pasteInput.focus();
+                const manual = prompt('انسخ سطر البيع من شيت جوجل (Ctrl + C) ثم الصقه هنا (Ctrl + V):', elements.pasteInput.value || '');
+                if (manual && manual.trim()) {
+                    elements.pasteInput.value = manual;
+                    handlePasteProcess(true);
+                }
             }
         }
+
+        // Global Paste Listener (allows pressing Ctrl+V anywhere on the page)
+        window.addEventListener('paste', (e) => {
+            const target = e.target;
+            if (target && target.tagName === 'INPUT' && target.id !== 'paste-input') {
+                return;
+            }
+            if (e.clipboardData && e.clipboardData.getData) {
+                const text = e.clipboardData.getData('text');
+                if (text && text.trim()) {
+                    elements.pasteInput.value = text;
+                    handlePasteProcess(true);
+                }
+            }
+        });
 
         // Direct paste from clipboard buttons
         if (elements.btnReadClipboard) {
@@ -1067,6 +1090,9 @@
             elements.btnPrintSecondary.addEventListener('click', triggerPrint);
         }
         elements.btnNewInvoice.addEventListener('click', startNewInvoice);
+        if (elements.btnNewInvoiceSecondary) {
+            elements.btnNewInvoiceSecondary.addEventListener('click', startNewInvoice);
+        }
 
         // Click receipt to print in Simple Mode
         if (elements.rcToPrint) {
@@ -1166,7 +1192,28 @@
         elements.invDate.value = state.date;
         elements.invTime.value = state.time;
 
+        // Populate real store default data so the invoice is alive and realistic
+        if (!state.items || state.items.length === 0) {
+            state.customer = 'احمد سامح - 01112302757';
+            elements.invCustomer.value = state.customer;
+            state.paymentMethod = 'إنستاباي';
+            elements.invPayment.value = state.paymentMethod;
+
+            state.items = [
+                {
+                    name: 'بوجيه NGK ياباني أصلي',
+                    code: 'M003',
+                    qty: 5,
+                    price: 170,
+                    basePrice: 200,
+                    discountPercent: 15,
+                    total: 850
+                }
+            ];
+        }
+
         setupEventListeners();
+        renderItemsTable();
         updateReceiptPreview();
 
         // Apply saved UI Mode (defaults to simple mode)

@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>طباعة فواتير المحل 80mm - متوافق مع جوجل شيت</title>
+    <title>طابعة فواتير 80mm - قطع غيار الزين</title>
+    <link rel="icon" type="image/png" href="logo.png">
+    <meta name="theme-color" content="#2563eb">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -286,10 +288,15 @@
                 </div>
             </div>
 
-            <!-- Print Shortcut Button on Right side -->
-            <button class="btn btn-primary btn-block no-print mode-pro-only" id="btn-print-secondary" style="margin-top: 0.75rem;">
-                🖨️ طباعة المعاينة الحالية
-            </button>
+            <!-- Print & New Action Buttons Under Receipt Preview -->
+            <div class="no-print" style="margin-top: 0.75rem; display: flex; gap: 0.6rem;">
+                <button class="btn btn-primary btn-lg" id="btn-print-secondary" style="flex: 2; font-size: 1.05rem; padding: 0.75rem; background: #059669; border-color: #059669;" title="طباعة الفاتورة فوراً">
+                    🖨️ طباعة الفاتورة الآن (Ctrl + P)
+                </button>
+                <button class="btn btn-outline" id="btn-new-invoice-secondary" style="flex: 1;" title="بدء فاتورة جديدة">
+                    🔄 جديدة
+                </button>
+            </div>
         </div>
 
     </main>
