@@ -464,6 +464,7 @@ body.mode-simple #receipt-to-print:hover {
 .thermal-receipt {
     width: 70mm;
     max-width: 100%;
+    box-sizing: border-box;
     background: #ffffff;
     color: #000000;
     padding: 14px 10px;
@@ -474,6 +475,7 @@ body.mode-simple #receipt-to-print:hover {
     border-top: 3px solid #1e293b;
     position: relative;
     user-select: text;
+    overflow-wrap: break-word;
 }
 
 /* Store Logo */
@@ -556,6 +558,7 @@ body.mode-simple #receipt-to-print:hover {
 
 .rc-table {
     width: 100%;
+    table-layout: fixed;
     border-collapse: collapse;
     margin: 6px 0;
     font-size: 12px;
@@ -762,12 +765,33 @@ body.mode-simple #receipt-to-print:hover {
         display: block !important;
         width: 70mm !important; /* المقاس المعتمد 70mm */
         max-width: 70mm !important;
+        min-width: 70mm !important;
+        box-sizing: border-box !important;
         margin: 0 auto !important;
         padding: 2mm 1.5mm 6mm 1.5mm !important;
         box-shadow: none !important;
         border: none !important;
         background: #ffffff !important;
         color: #000000 !important;
+        overflow: hidden !important;
+    }
+
+    .rc-table, 
+    .rc-totals-table {
+        width: 100% !important;
+        max-width: 100% !important;
+        table-layout: fixed !important;
+    }
+
+    .rc-item-name, 
+    .rc-item-code, 
+    .rc-store-name, 
+    .rc-store-sub, 
+    .rc-store-contact, 
+    .rc-meta-row, 
+    .rc-footer-text {
+        word-break: break-word !important;
+        overflow-wrap: break-word !important;
     }
 
     .rc-logo {
