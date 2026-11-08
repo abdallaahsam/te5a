@@ -28,7 +28,7 @@
             logoUrl: 'logo.png',
             footerText: 'البضاعة المباعة ترد وتستبدل خلال 14 يوماً بالفاتورة وبحالتها الأصلية\nشكراً لزيارتكم ونسعد بخدمتكم دائماً!',
             showItemCode: true,
-            autoPrint: false
+            autoPrint: true
         },
         history: []
     };
@@ -200,6 +200,9 @@
             const saved = localStorage.getItem('receipt_pos_settings');
             if (saved) {
                 state.settings = Object.assign(state.settings, JSON.parse(saved));
+            }
+            if (state.settings.autoPrint === undefined) {
+                state.settings.autoPrint = true;
             }
             const savedLastInv = localStorage.getItem('receipt_pos_last_inv');
             if (savedLastInv) {
@@ -396,7 +399,7 @@
     /**
      * Process Paste Action
      */
-    function handlePasteProcess() {
+    function handlePasteProcess(forcePrint = false) {
         const rawText = elements.pasteInput.value;
         if (!rawText.trim()) {
             alert('الرجاء لصق سطر المبيعات أولاً!');
@@ -433,9 +436,9 @@
         // Clear paste input after successful import
         elements.pasteInput.value = '';
 
-        // Auto print if enabled in settings
-        if (state.settings.autoPrint) {
-            setTimeout(triggerPrint, 300);
+        // Auto print if forced or enabled in settings
+        if (forcePrint || state.settings.autoPrint) {
+            setTimeout(triggerPrint, 200);
         }
     }
 
@@ -634,7 +637,7 @@
     }
 
     /**
-     * Trigger Print Action using an isolated iframe for 100% reliable 80mm thermal printing
+     * Trigger Print Action
      */
     function triggerPrint() {
         if (state.items.length === 0) {
@@ -645,134 +648,13 @@
         // Save current invoice to history
         saveToHistory();
 
-        // Clone receipt
-        const receiptEl = document.getElementById('receipt-to-print');
-        const receiptClone = receiptEl.cloneNode(true);
+        // Native instant printing (100% reliable on HTTPS, GitHub Pages, Chrome, Edge)
+        window.print();
 
-        // Handle logo display in cloned receipt
-        const logoBox = receiptClone.querySelector('#rc-logo-box');
-        if (logoBox) {
-            if (state.settings.showLogo !== false) {
-                logoBox.style.display = 'block';
-                const logoImg = logoBox.querySelector('img');
-                if (logoImg) logoImg.src = state.logoBase64 || state.settings.logoUrl || 'logo.png';
-            } else {
-                logoBox.style.display = 'none';
-            }
-        }
-
-        // Get or create print iframe
-        let printFrame = document.getElementById('pos-print-frame');
-        if (!printFrame) {
-            printFrame = document.createElement('iframe');
-            printFrame.id = 'pos-print-frame';
-            printFrame.style.position = 'fixed';
-            printFrame.style.right = '0';
-            printFrame.style.bottom = '0';
-            printFrame.style.width = '0';
-            printFrame.style.height = '0';
-            printFrame.style.border = '0';
-            printFrame.style.visibility = 'hidden';
-            document.body.appendChild(printFrame);
-        }
-
-        const printWidth = '70mm'; // المقاس المعتمد 70mm
-
-        const frameDoc = printFrame.contentWindow.document;
-        frameDoc.open();
-        frameDoc.write(`<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <title>فاتورة - ${state.invoiceNumber}</title>
-    <style>
-        @page {
-            size: 80mm auto;
-            margin: 0mm;
-        }
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-        body {
-            font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
-            width: ${printWidth};
-            margin: 0 auto;
-            padding: 2mm 1.5mm 6mm 1.5mm;
-            color: #000000 !important;
-            background: #ffffff !important;
-            font-size: 13px;
-            line-height: 1.35;
-            direction: rtl;
-            text-align: right;
-            -webkit-print-color-adjust: exact;
-            print-color-adjust: exact;
-        }
-        .thermal-receipt {
-            width: 100% !important;
-            max-width: ${printWidth} !important;
-            margin: 0 auto !important;
-            padding: 0 !important;
-            box-shadow: none !important;
-            border: none !important;
-        }
-        .rc-logo-box { text-align: center; margin-bottom: 6px; }
-        .rc-logo { max-width: 60mm !important; max-height: 28mm !important; object-fit: contain !important; display: block !important; margin: 0 auto 5px auto !important; image-rendering: -webkit-optimize-contrast; }
-        .rc-center { text-align: center; }
-        .rc-left { text-align: left; }
-        .rc-right { text-align: right; }
-        .rc-bold { font-weight: bold; }
-        .rc-store-name { font-size: 18px; font-weight: 900; margin-bottom: 3px; }
-        .rc-store-sub { font-size: 12.5px; margin-bottom: 3px; font-weight: 600; }
-        .rc-store-contact { font-size: 11.5px; margin-bottom: 3px; }
-        .rc-divider { border: none; border-top: 1px dashed #000; margin: 6px 0; }
-        .rc-divider-double { border: none; border-top: 2px solid #000; margin: 6px 0; }
-        .rc-meta-row { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 3px; }
-        .rc-table { width: 100%; border-collapse: collapse; margin: 6px 0; font-size: 12px; }
-        .rc-table th { border-top: 1px dashed #000; border-bottom: 1px dashed #000; padding: 4px 1px; font-weight: 800; font-size: 12px; }
-        .rc-table td { padding: 4px 1px; vertical-align: top; font-size: 12px; }
-        .rc-table tr.item-row td { border-bottom: 1px dotted #888; }
-        .rc-item-name { font-weight: 800; font-size: 13px; display: block; word-break: break-word; }
-        .rc-item-code { font-size: 10.5px; }
-        .rc-totals-table { width: 100%; margin-top: 6px; font-size: 12.5px; }
-        .rc-totals-table td { padding: 3px 0; }
-        .rc-grand-total { font-size: 17px; font-weight: 900; border-top: 1.5px solid #000; border-bottom: 1.5px solid #000; padding: 5px 0; }
-        .rc-footer-text { font-size: 11px; margin-top: 8px; text-align: center; line-height: 1.35; font-weight: 600; }
-        img { image-rendering: pixelated; }
-    </style>
-</head>
-<body>
-    ${receiptClone.outerHTML}
-</body>
-</html>`);
-        frameDoc.close();
-
-        // Trigger print in iframe
-        setTimeout(() => {
-            try {
-                printFrame.contentWindow.focus();
-                printFrame.contentWindow.print();
-            } catch (err) {
-                console.warn('Iframe print fallback to window.print', err);
-                window.print();
-            }
-
-            // Clean up iframe content after printing to free memory
-            setTimeout(() => {
-                try {
-                    const cleanDoc = printFrame.contentWindow.document;
-                    cleanDoc.open();
-                    cleanDoc.write('');
-                    cleanDoc.close();
-                } catch(e) {}
-            }, 1000);
-        }, 300);
-
-        // Delay invoice number increment to reduce gaps from cancelled prints
+        // Increment invoice number for next sale
         setTimeout(() => {
             incrementInvoiceNumber();
-        }, 2000);
+        }, 1200);
     }
 
     /**
@@ -786,10 +668,12 @@
             printFrame.style.position = 'fixed';
             printFrame.style.right = '0';
             printFrame.style.bottom = '0';
-            printFrame.style.width = '0';
-            printFrame.style.height = '0';
+            printFrame.style.width = '100px';
+            printFrame.style.height = '100px';
             printFrame.style.border = '0';
-            printFrame.style.visibility = 'hidden';
+            printFrame.style.opacity = '0.01';
+            printFrame.style.pointerEvents = 'none';
+            printFrame.style.zIndex = '-9999';
             document.body.appendChild(printFrame);
         }
 
@@ -833,9 +717,13 @@
         frameDoc.close();
 
         setTimeout(() => {
-            printFrame.contentWindow.focus();
-            printFrame.contentWindow.print();
-        }, 200);
+            try {
+                printFrame.contentWindow.focus();
+                printFrame.contentWindow.print();
+            } catch (err) {
+                console.warn('Iframe test print error', err);
+            }
+        }, 300);
     }
 
     /**
@@ -1035,9 +923,9 @@
                     return;
                 }
                 elements.pasteInput.value = text;
-                handlePasteProcess();
+                handlePasteProcess(true);
             } catch(err) {
-                alert('يرجى لصق السطر يدوياً بالضغط داخل المربع ثم Ctrl + V.');
+                alert('يرجى لصق السطر يدوياً بالضغط داخل المربع ثم Ctrl + V (أو السماح للمتصفح بالوصول للحافظة).');
                 elements.pasteInput.focus();
             }
         }
@@ -1065,14 +953,14 @@
 
         // Auto process on Paste in textarea
         elements.pasteInput.addEventListener('paste', () => {
-            setTimeout(handlePasteProcess, 100);
+            setTimeout(() => handlePasteProcess(true), 100);
         });
 
         // Enter key in paste input
         elements.pasteInput.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
                 e.preventDefault();
-                handlePasteProcess();
+                handlePasteProcess(true);
             }
         });
 
