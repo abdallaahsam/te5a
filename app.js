@@ -167,10 +167,14 @@
     }
 
     /**
-     * Format number with 2 decimals
+     * Format number without decimal zeros (.00)
      */
     function formatMoney(num) {
-        return (Math.round(num * 100) / 100).toFixed(2);
+        const val = Math.round((Number(num) || 0) * 100) / 100;
+        if (Number.isInteger(val)) {
+            return val.toString();
+        }
+        return parseFloat(val.toFixed(2)).toString();
     }
 
     /**
@@ -691,7 +695,7 @@
         } else {
             elements.rcPaidRow.style.display = 'none';
             elements.rcChangeRow.style.display = 'none';
-            elements.invChange.value = '0.00';
+            elements.invChange.value = '0';
         }
 
         // Footer policy
@@ -906,7 +910,7 @@
 
         elements.invDiscount.value = '0';
         elements.invPaid.value = '';
-        elements.invChange.value = '0.00';
+        elements.invChange.value = '0';
 
         state.items = [];
         renderItemsTable();

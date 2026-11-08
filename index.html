@@ -167,11 +167,11 @@
                     </div>
                     <div class="form-group">
                         <label for="inv-paid">المبلغ المدفوع (ج.م)</label>
-                        <input type="number" step="0.5" id="inv-paid" class="form-control" placeholder="0.00">
+                        <input type="number" step="0.5" id="inv-paid" class="form-control" placeholder="0">
                     </div>
                     <div class="form-group">
                         <label for="inv-change">المتبقي / الباقي (ج.م)</label>
-                        <input type="text" id="inv-change" class="form-control" value="0.00" readonly style="background: #f1f5f9; font-weight: bold; color: #1e293b;">
+                        <input type="text" id="inv-change" class="form-control" value="0" readonly style="background: #f1f5f9; font-weight: bold; color: #1e293b;">
                     </div>
                 </div>
 
@@ -216,10 +216,6 @@
                     <div class="rc-divider-double"></div>
 
                     <!-- Receipt Metadata -->
-                    <div class="rc-center rc-bold" style="font-size: 13px; margin-bottom: 4px;">
-                        فاتورة مبيعات
-                    </div>
-                    
                     <div class="rc-meta-row">
                         <span>رقم الفاتورة:</span>
                         <span class="rc-bold" id="rc-inv-number">INV-1001</span>
@@ -259,23 +255,23 @@
                     <table class="rc-totals-table">
                         <tr id="rc-subtotal-row">
                             <td class="rc-right">المجموع الفرعي:</td>
-                            <td class="rc-left rc-bold" id="rc-subtotal">0.00 ج.م</td>
+                            <td class="rc-left rc-bold" id="rc-subtotal">0 ج.م</td>
                         </tr>
                         <tr id="rc-discount-row" style="display: none;">
                             <td class="rc-right" id="rc-discount-label">الخصم:</td>
-                            <td class="rc-left rc-bold" id="rc-discount">0.00 ج.م</td>
+                            <td class="rc-left rc-bold" id="rc-discount">0 ج.م</td>
                         </tr>
                         <tr class="rc-grand-total">
                             <td class="rc-right">الصافي المطلوب:</td>
-                            <td class="rc-left" id="rc-grand-total">0.00 ج.م</td>
+                            <td class="rc-left" id="rc-grand-total">0 ج.م</td>
                         </tr>
                         <tr id="rc-paid-row" style="display: none;">
                             <td class="rc-right">المدفوع:</td>
-                            <td class="rc-left" id="rc-paid">0.00 ج.م</td>
+                            <td class="rc-left" id="rc-paid">0 ج.م</td>
                         </tr>
                         <tr id="rc-change-row" style="display: none;">
                             <td class="rc-right">الباقي للعميل:</td>
-                            <td class="rc-left rc-bold" id="rc-change">0.00 ج.م</td>
+                            <td class="rc-left rc-bold" id="rc-change">0 ج.م</td>
                         </tr>
                     </table>
 

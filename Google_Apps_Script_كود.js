@@ -52,6 +52,11 @@ function printSelectedRowInvoice() {
   var originalSubtotal = basePrice * qty;
   var discountAmount = (basePrice - unitPrice) * qty;
   var total = parseFloat(String(data[8]).replace(/[٫,٬]/g, '')) || (qty * unitPrice);
+
+  function formatMoney(num) {
+    var val = Math.round((Number(num) || 0) * 100) / 100;
+    return (val % 1 === 0) ? String(val) : String(parseFloat(val.toFixed(2)));
+  }
   
   var customerName = data[10] ? String(data[10]).trim() : 'عميل نقدي';
   var customerPhone = data[11] ? String(data[11]).trim() : '';
@@ -141,11 +146,11 @@ function printSelectedRowInvoice() {
           <td style="text-align: right;">
             <div class="bold">${itemName}</div>
             ${itemCode ? `<div style="font-size: 9px;">كود: ${itemCode}</div>` : ''}
-            ${hasDiscount ? `<div style="font-size: 9.5px; font-weight: bold; color: #000;">خصم ${discountPercent}% (بدلاً من ${basePrice.toFixed(2)})</div>` : ''}
+            ${hasDiscount ? `<div style="font-size: 9.5px; font-weight: bold; color: #000;">خصم ${discountPercent}% (بدلاً من ${formatMoney(basePrice)})</div>` : ''}
           </td>
           <td style="text-align: center; font-weight: bold;">${qty}</td>
-          <td style="text-align: center;">${unitPrice.toFixed(2)}</td>
-          <td style="text-align: left; font-weight: bold;">${total.toFixed(2)}</td>
+          <td style="text-align: center;">${formatMoney(unitPrice)}</td>
+          <td style="text-align: left; font-weight: bold;">${formatMoney(total)}</td>
         </tr>
       </tbody>
     </table>
@@ -153,12 +158,12 @@ function printSelectedRowInvoice() {
     <div class="divider"></div>
     
     ${hasDiscount ? `
-    <div class="row"><span>المجموع الفرعي:</span> <span>${originalSubtotal.toFixed(2)} ج.م</span></div>
-    <div class="row" style="font-weight: bold;"><span>الخصم (${discountPercent}%):</span> <span>-${discountAmount.toFixed(2)} ج.م</span></div>
+    <div class="row"><span>المجموع الفرعي:</span> <span>${formatMoney(originalSubtotal)} ج.م</span></div>
+    <div class="row" style="font-weight: bold;"><span>الخصم (${discountPercent}%):</span> <span>-${formatMoney(discountAmount)} ج.م</span></div>
     ` : ''}
     <div class="row grand-total">
       <span>الصافي المطلوب:</span>
-      <span>${total.toFixed(2)} ج.م</span>
+      <span>${formatMoney(total)} ج.م</span>
     </div>
     
     <div class="center" style="font-size: 9.5px; margin-top: 10px;">
