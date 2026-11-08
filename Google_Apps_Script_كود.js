@@ -106,8 +106,10 @@ function printSelectedRowInvoice() {
     </div>
     
     <div class="center">
-      <div class="store-title">فاتورة مبيعات</div>
-      <div style="font-size: 10px;">للمبيعات النقدية</div>
+      <div class="store-title">محل قطع غيار الزين</div>
+      <div style="font-size: 11px; font-weight: bold;">لقطع الغيار والاكسسوارات</div>
+      <div style="font-size: 10px;">هاتف: 01094262698 - 01125428081</div>
+      <div style="font-size: 10px;">10 شـ خيري الجندي من شـ 30 مارس</div>
     </div>
     
     <div class="divider-double"></div>

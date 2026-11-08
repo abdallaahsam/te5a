@@ -17,10 +17,10 @@
         discount: 0,
         paid: 0,
         settings: {
-            storeName: 'EL ZAIN - الزين لقطع الغيار',
-            storeSub: 'لتجارة وتوزيع قطع الغيار والاكسسوارات',
-            storeContact: 'هاتف: 01000000000 - 01100000000',
-            storeAddress: 'شارع الجمهورية، بجوار البنك الأهلي',
+            storeName: 'محل قطع غيار الزين',
+            storeSub: 'لقطع الغيار والاكسسوارات',
+            storeContact: 'هاتف: 01094262698 - 01125428081',
+            storeAddress: '10 شـ خيري الجندي من شـ 30 مارس',
             storeTax: '',
             currency: 'ج.م',
             receiptWidth: '70mm',
@@ -199,7 +199,15 @@
         try {
             const saved = localStorage.getItem('receipt_pos_settings');
             if (saved) {
-                state.settings = Object.assign(state.settings, JSON.parse(saved));
+                const parsed = JSON.parse(saved);
+                // Upgrade from old placeholder numbers if present
+                if (parsed.storeContact && parsed.storeContact.includes('01000000000')) {
+                    delete parsed.storeName;
+                    delete parsed.storeSub;
+                    delete parsed.storeContact;
+                    delete parsed.storeAddress;
+                }
+                state.settings = Object.assign(state.settings, parsed);
             }
             if (state.settings.autoPrint === undefined) {
                 state.settings.autoPrint = true;
@@ -238,7 +246,7 @@
      * Save settings to localStorage
      */
     function saveSettings() {
-        state.settings.storeName = elements.setStoreName.value.trim() || 'EL ZAIN - الزين لقطع الغيار';
+        state.settings.storeName = elements.setStoreName.value.trim() || 'محل قطع غيار الزين';
         state.settings.storeSub = elements.setStoreSub.value.trim();
         state.settings.storeContact = elements.setStoreContact.value.trim();
         state.settings.storeAddress = elements.setStoreAddress.value.trim();
@@ -704,14 +712,14 @@
     </style>
 </head>
 <body>
-    <div class="bold" style="font-size: 16px;">=== EL ZAIN - فحص الطابعة ===</div>
+    <div class="bold" style="font-size: 16px;">=== محل قطع غيار الزين - فحص الطابعة ===</div>
     <div style="margin: 4px 0; font-size: 12px;">المقاس المعتمد: 70mm</div>
     <div class="line"></div>
     <div style="font-size: 12px;">التاريخ: ${dt.dateStr} - الوقت: ${dt.timeStr}</div>
     <div style="font-size: 14px; margin: 6px 0; letter-spacing: 2px;">████████████████</div>
     <div class="bold" style="font-size: 14px; margin: 4px 0;">جاهز للطباعة بخط واضح وكبير!</div>
     <div class="line"></div>
-    <div style="font-size: 11px;">EL ZAIN لقطع الغيار - طابعة فواتير 80mm</div>
+    <div style="font-size: 11px;">محل قطع غيار الزين - طابعة فواتير 80mm</div>
 </body>
 </html>`);
         frameDoc.close();
