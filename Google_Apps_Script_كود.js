@@ -95,9 +95,10 @@ function printSelectedRowInvoice() {
       .divider { border-top: 1px dashed #000; margin: 6px 0; }
       .divider-double { border-top: 2px solid #000; margin: 6px 0; }
       .row { display: flex; justify-content: space-between; margin-bottom: 3px; font-size: 11.5px; }
-      table { width: 100%; border-collapse: collapse; margin: 6px 0; font-size: 11.5px; table-layout: fixed; box-sizing: border-box; }
-      th { border-top: 1px dashed #000; border-bottom: 1px dashed #000; padding: 3px 2px; font-weight: 800; font-size: 11.5px; }
-      td { padding: 3px 2px; font-size: 11.5px; word-break: break-word; }
+      table { width: 100%; border-collapse: collapse; margin: 6px 0; font-size: 11px; table-layout: fixed; box-sizing: border-box; }
+      th { border-top: 1px dashed #000; border-bottom: 1px dashed #000; padding: 3px 1px; font-weight: 800; font-size: 10.5px; white-space: nowrap; word-break: normal; }
+      td { padding: 3px 1px; font-size: 11px; }
+      td.center, td.left { white-space: nowrap; }
       .grand-total {
         font-size: 17px;
         font-weight: 900;
@@ -135,22 +136,22 @@ function printSelectedRowInvoice() {
     <table>
       <thead>
         <tr>
-          <th style="text-align: right; width: 44%;">الصنف</th>
-          <th style="text-align: center; width: 14%;">الكمية</th>
-          <th style="text-align: center; width: 19%;">السعر</th>
-          <th style="text-align: left; width: 23%; padding-left: 3px;">الإجمالي</th>
+          <th style="text-align: right; width: 37%;">الصنف</th>
+          <th style="text-align: center; width: 18%;">الكمية</th>
+          <th style="text-align: center; width: 20%;">السعر</th>
+          <th style="text-align: left; width: 25%;">الإجمالي</th>
         </tr>
       </thead>
       <tbody>
         <tr>
-          <td style="text-align: right;">
+          <td style="text-align: right; word-break: break-word;">
             <div class="bold">${itemName}</div>
             ${itemCode ? `<div style="font-size: 9px;">كود: ${itemCode}</div>` : ''}
             ${hasDiscount ? `<div style="font-size: 9.5px; font-weight: bold; color: #000;">خصم ${discountPercent}% (بدلاً من ${formatMoney(basePrice)})</div>` : ''}
           </td>
-          <td style="text-align: center; font-weight: bold;">${qty}</td>
-          <td style="text-align: center;">${formatMoney(unitPrice)}</td>
-          <td style="text-align: left; font-weight: bold;">${formatMoney(total)}</td>
+          <td style="text-align: center; font-weight: bold; white-space: nowrap;">${qty}</td>
+          <td style="text-align: center; white-space: nowrap;">${formatMoney(unitPrice)}</td>
+          <td style="text-align: left; font-weight: bold; white-space: nowrap;">${formatMoney(total)}</td>
         </tr>
       </tbody>
     </table>
