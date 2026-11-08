@@ -599,6 +599,14 @@ body.mode-simple #receipt-to-print:hover {
     color: #444;
 }
 
+.rc-item-discount {
+    font-size: 10px;
+    font-weight: 800;
+    color: #000000;
+    display: block;
+    margin-top: 1px;
+}
+
 .rc-totals-table {
     width: 100%;
     margin-top: 6px;
@@ -813,6 +821,13 @@ body.mode-simple #receipt-to-print:hover {
         color: #000000 !important;
         padding: 2px 2px !important;
         word-break: break-word !important;
+    }
+
+    .rc-item-discount {
+        font-size: 10px !important;
+        font-weight: 800 !important;
+        color: #000000 !important;
+        display: block !important;
     }
 
     .rc-totals-table {

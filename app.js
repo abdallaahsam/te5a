@@ -86,6 +86,7 @@
         rcSubtotalRow: document.getElementById('rc-subtotal-row'),
         rcSubtotal: document.getElementById('rc-subtotal'),
         rcDiscountRow: document.getElementById('rc-discount-row'),
+        rcDiscountLabel: document.getElementById('rc-discount-label'),
         rcDiscount: document.getElementById('rc-discount'),
         rcGrandTotal: document.getElementById('rc-grand-total'),
         rcPaidRow: document.getElementById('rc-paid-row'),
@@ -288,6 +289,7 @@
             name: 2,
             code: 3,
             qty: 4,
+            basePrice: 5, // سعر البيع الأساسي
             price: 7, // السعر المعتمد
             total: 8,
             profit: 9, // ignore
@@ -309,7 +311,8 @@
                     if (h.includes('اسم الصنف') || h === 'الصنف') colMap.name = idx;
                     else if (h.includes('كود')) colMap.code = idx;
                     else if (h.includes('الكمية') || h === 'العدد') colMap.qty = idx;
-                    else if (h.includes('السعر المعتمد')) colMap.price = idx;
+                    else if (h.includes('سعر البيع الأساسي') || h.includes('الأساسي') || h.includes('الاساسي')) colMap.basePrice = idx;
+                    else if (h.includes('السعر المعتمد') || h.includes('المعتمد')) colMap.price = idx;
                     else if (h.includes('إجمالي') || h.includes('اجمالي')) colMap.total = idx;
                     else if (h.includes('التاريخ')) colMap.date = idx;
                     else if (h.includes('هاتف') || h.includes('تليفون') || h.includes('موبايل') || h.includes('رقم العميل') || h.includes('رقم الهاتف')) colMap.phone = idx;
@@ -347,6 +350,22 @@
                 unitPrice = parseArabicNumber(parts[colMap.price]);
             } else if (parts[5] !== undefined) {
                 unitPrice = parseArabicNumber(parts[5]);
+            }
+
+            // For base price: use "سعر البيع الأساسي" (col 5)
+            let basePrice = 0;
+            if (colMap.basePrice !== undefined && parts[colMap.basePrice] !== undefined && parts[colMap.basePrice] !== '') {
+                basePrice = parseArabicNumber(parts[colMap.basePrice]);
+            } else if (parts[5] !== undefined && parts[5] !== '') {
+                basePrice = parseArabicNumber(parts[5]);
+            } else {
+                basePrice = unitPrice;
+            }
+
+            // Calculate item discount percentage rounded to nearest whole integer
+            let discountPercent = 0;
+            if (basePrice > unitPrice && basePrice > 0) {
+                discountPercent = Math.round(((basePrice - unitPrice) / basePrice) * 100);
             }
 
             const total = qty * unitPrice;
@@ -392,6 +411,8 @@
                 code: itemCode,
                 qty: qty,
                 price: unitPrice,
+                basePrice: basePrice,
+                discountPercent: discountPercent,
                 total: total
             });
         });
@@ -457,11 +478,16 @@
         elements.itemsTbody.innerHTML = '';
 
         state.items.forEach((item, index) => {
+            const basePrice = (item.basePrice !== undefined && item.basePrice > 0) ? item.basePrice : item.price;
+            const hasDiscount = basePrice > item.price;
+            const discountPct = hasDiscount ? (item.discountPercent || Math.round(((basePrice - item.price) / basePrice) * 100)) : 0;
+
             const tr = document.createElement('tr');
             tr.innerHTML = `
                 <td class="td-num">${index + 1}</td>
                 <td>
                     <input type="text" value="${escapeHtml(item.name)}" data-index="${index}" data-field="name" class="item-input">
+                    ${hasDiscount ? `<div style="font-size: 11px; color: #16a34a; font-weight: 700; margin-top: 3px;">🏷️ خصم ${discountPct}% (الأساسي: ${formatMoney(basePrice)})</div>` : ''}
                 </td>
                 <td>
                     <input type="text" value="${escapeHtml(item.code)}" data-index="${index}" data-field="code" class="item-input">
@@ -502,6 +528,13 @@
         }
 
         state.items[index][field] = val;
+        if (field === 'price' && state.items[index].basePrice > 0) {
+            if (state.items[index].basePrice > state.items[index].price) {
+                state.items[index].discountPercent = Math.round(((state.items[index].basePrice - state.items[index].price) / state.items[index].basePrice) * 100);
+            } else {
+                state.items[index].discountPercent = 0;
+            }
+        }
         state.items[index].total = (state.items[index].qty || 0) * (state.items[index].price || 0);
 
         // Update row total cell
@@ -525,6 +558,8 @@
             code: '',
             qty: 1,
             price: 0,
+            basePrice: 0,
+            discountPercent: 0,
             total: 0
         });
         renderItemsTable();
@@ -574,11 +609,26 @@
 
         // Render receipt items
         elements.rcItemsBody.innerHTML = '';
+        let originalSubtotal = 0;
+        let itemsDiscount = 0;
         let subtotal = 0;
 
         state.items.forEach(item => {
-            const itemTotal = (item.qty || 0) * (item.price || 0);
+            const qty = item.qty || 0;
+            const unitPrice = item.price || 0;
+            const itemTotal = qty * unitPrice;
             subtotal += itemTotal;
+
+            const basePrice = (item.basePrice !== undefined && item.basePrice > 0) ? item.basePrice : unitPrice;
+            const hasItemDiscount = basePrice > unitPrice;
+            const itemDiscountPct = hasItemDiscount ? (item.discountPercent || Math.round(((basePrice - unitPrice) / basePrice) * 100)) : 0;
+
+            if (hasItemDiscount) {
+                originalSubtotal += qty * basePrice;
+                itemsDiscount += qty * (basePrice - unitPrice);
+            } else {
+                originalSubtotal += itemTotal;
+            }
 
             const tr = document.createElement('tr');
             tr.className = 'item-row';
@@ -586,35 +636,39 @@
                 <td class="rc-right">
                     <span class="rc-item-name">${escapeHtml(item.name)}</span>
                     ${(state.settings.showItemCode && item.code) ? `<span class="rc-item-code">كود: ${escapeHtml(item.code)}</span>` : ''}
+                    ${hasItemDiscount ? `<span class="rc-item-discount">خصم ${itemDiscountPct}% (بدلاً من ${formatMoney(basePrice)})</span>` : ''}
                 </td>
-                <td class="rc-center rc-bold">${item.qty}</td>
-                <td class="rc-center">${formatMoney(item.price)}</td>
+                <td class="rc-center rc-bold">${qty}</td>
+                <td class="rc-center">${formatMoney(unitPrice)}</td>
                 <td class="rc-left rc-bold">${formatMoney(itemTotal)}</td>
             `;
             elements.rcItemsBody.appendChild(tr);
         });
 
         // Totals calculations
-        const discount = parseArabicNumber(elements.invDiscount.value) || 0;
-        const grandTotal = Math.max(0, subtotal - discount);
+        const manualDiscount = parseArabicNumber(elements.invDiscount.value) || 0;
+        const totalDiscount = itemsDiscount + manualDiscount;
+        const grandTotal = Math.max(0, subtotal - manualDiscount);
         const paid = parseArabicNumber(elements.invPaid.value) || 0;
         const change = paid > 0 ? (paid - grandTotal) : 0;
 
         const curr = state.settings.currency;
 
-        // Hide subtotal row if no discount (subtotal = grand total, no point showing both)
-        if (discount > 0) {
+        // Hide subtotal row and discount row if no discount
+        if (totalDiscount > 0) {
+            const baseBeforeDiscount = originalSubtotal > 0 ? originalSubtotal : (subtotal + totalDiscount);
+            const overallDiscountPercent = baseBeforeDiscount > 0 ? Math.round((totalDiscount / baseBeforeDiscount) * 100) : 0;
+
             elements.rcSubtotalRow.style.display = 'table-row';
+            elements.rcSubtotal.textContent = `${formatMoney(baseBeforeDiscount)} ${curr}`;
+
+            elements.rcDiscountRow.style.display = 'table-row';
+            if (elements.rcDiscountLabel) {
+                elements.rcDiscountLabel.textContent = overallDiscountPercent > 0 ? `الخصم (${overallDiscountPercent}%):` : 'الخصم:';
+            }
+            elements.rcDiscount.textContent = `-${formatMoney(totalDiscount)} ${curr}`;
         } else {
             elements.rcSubtotalRow.style.display = 'none';
-        }
-
-        elements.rcSubtotal.textContent = `${formatMoney(subtotal)} ${curr}`;
-
-        if (discount > 0) {
-            elements.rcDiscountRow.style.display = 'table-row';
-            elements.rcDiscount.textContent = `-${formatMoney(discount)} ${curr}`;
-        } else {
             elements.rcDiscountRow.style.display = 'none';
         }
 

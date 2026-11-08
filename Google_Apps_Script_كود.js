@@ -44,7 +44,13 @@ function printSelectedRowInvoice() {
   var itemName = data[2] || '';
   var itemCode = data[3] || '';
   var qty = parseFloat(String(data[4]).replace(/[٫,]/g, '.')) || 1;
-  var unitPrice = parseFloat(String(data[7]).replace(/[٫,]/g, '.')) || parseFloat(String(data[5]).replace(/[٫,]/g, '.')) || 0;
+  var basePrice = parseFloat(String(data[5]).replace(/[٫,٬]/g, '.')) || 0;
+  var unitPrice = parseFloat(String(data[7]).replace(/[٫,٬]/g, '.')) || basePrice || 0;
+  if (!basePrice) basePrice = unitPrice;
+  var hasDiscount = (basePrice > unitPrice && unitPrice > 0);
+  var discountPercent = hasDiscount ? Math.round(((basePrice - unitPrice) / basePrice) * 100) : 0;
+  var originalSubtotal = basePrice * qty;
+  var discountAmount = (basePrice - unitPrice) * qty;
   var total = parseFloat(String(data[8]).replace(/[٫,٬]/g, '')) || (qty * unitPrice);
   
   var customerName = data[10] ? String(data[10]).trim() : 'عميل نقدي';
@@ -135,6 +141,7 @@ function printSelectedRowInvoice() {
           <td style="text-align: right;">
             <div class="bold">${itemName}</div>
             ${itemCode ? `<div style="font-size: 9px;">كود: ${itemCode}</div>` : ''}
+            ${hasDiscount ? `<div style="font-size: 9.5px; font-weight: bold; color: #000;">خصم ${discountPercent}% (بدلاً من ${basePrice.toFixed(2)})</div>` : ''}
           </td>
           <td style="text-align: center; font-weight: bold;">${qty}</td>
           <td style="text-align: center;">${unitPrice.toFixed(2)}</td>
@@ -145,6 +152,10 @@ function printSelectedRowInvoice() {
     
     <div class="divider"></div>
     
+    ${hasDiscount ? `
+    <div class="row"><span>المجموع الفرعي:</span> <span>${originalSubtotal.toFixed(2)} ج.م</span></div>
+    <div class="row" style="font-weight: bold;"><span>الخصم (${discountPercent}%):</span> <span>-${discountAmount.toFixed(2)} ج.م</span></div>
+    ` : ''}
     <div class="row grand-total">
       <span>الصافي المطلوب:</span>
       <span>${total.toFixed(2)} ج.م</span>
